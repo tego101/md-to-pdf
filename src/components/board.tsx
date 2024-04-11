@@ -166,7 +166,7 @@ export default function Board() {
 					<Loader className='w-12 h-12 dark:text-white animate-spin' />
 				</div>
 			}>
-			<div className='flex flex-row items-center h-screen w-screen p-10'>
+			<div className='flex flex-row items-center h-screen w-screen'>
 				<ResizablePanelGroup
 					direction='horizontal'
 					className='shadow-2xl shadow-slate-600/20'>
