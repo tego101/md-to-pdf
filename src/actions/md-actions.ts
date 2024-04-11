@@ -1,9 +1,9 @@
 "use server";
 
 import fs from "fs";
-import { marked } from "marked";
 import path from "path";
 import puppeteer from "puppeteer";
+import { marked } from "marked";
 
 /**
  * CreatePDF
@@ -18,7 +18,7 @@ export const CreatePDF = async (markdownContent: string | Promise<string>) => {
 
 	// Parse Markdown to HTML
 	const html = marked(markdownString);
-	const tailwindCssPath = path.join(process.cwd(), ".next/static/css/globals.css");
+	const tailwindCssPath =  "./src/app/globals.css";
 	const tailwindCss = fs.readFileSync(tailwindCssPath, "utf-8");
 
 	// Launch a new browser instance
