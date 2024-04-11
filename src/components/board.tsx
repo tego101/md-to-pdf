@@ -1,18 +1,18 @@
 "use client";
 
+import { motion } from "framer-motion";
+
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { CreatePDF } from "@/actions/md-actions";
 import { Button } from "@/components/ui/button";
 
-
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,15 +21,20 @@ import { useToast } from "@/components/ui/use-toast";
 import {
 	File,
 	FilePlus2,
-	Link2,
+	Github, Link2,
 	Loader,
-	Pencil, Save, X
+	Pencil,
+	Save, Trash2
 } from "lucide-react";
 
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import UpdatePageNameForm from "./forms/update-page-name-form";
-import Image from "next/image";
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "./ui/resizable";
 
 export interface Pages {
 	title: string;
@@ -63,11 +68,7 @@ export default function Board() {
                 ### nextjs
                 ### tailwindcss
                 ### shadcn-ui`,
-			},
-			{
-				title: "Page 2",
-				content: `# Empty... Start writing here.`,
-			},
+			}
 		];
 		setPages(initialPages);
 		setCurrentPage(initialPages[0].title);
@@ -80,7 +81,7 @@ export default function Board() {
 		if (newPageID > 4) {
 			toast({
 				title: "Maximum number of pages reached",
-				description: "You can only have 3 pages",
+				description: "You can only have 4 pages.",
 				variant: "destructive",
 				duration: 5000,
 			});
@@ -139,6 +140,11 @@ export default function Board() {
 			setProcessing(false);
 			// Open the PDF in a new tab or window
 			window.open(url);
+			toast({
+				title: "PDF generated!",
+				description: "Your PDF should have opened in a new tab.",
+				duration: 5000,
+			});
 		} catch (error) {
 			console.error(error);
 			setProcessing(false);
@@ -161,157 +167,172 @@ export default function Board() {
 				</div>
 			}>
 			<div className='flex flex-row items-center h-screen w-screen p-10'>
-				<div className='w-1/2 h-full p-2 bg-black rounded-l-xl'>
-					<Tabs
-						defaultValue={currentPage ?? pages[0]?.title}
-						className='h-full w-full overflow-y-auto'>
-						<div className='m-2 flex dark:bg-black flex-row items-center justify-between overflow-x-auto dark:bg-transparent p-1'>
-							{pages.length > 0 ? (
-								<TabsList>
-									{pages.map((page, index) => (
-										<div
-											key={index}
-											className='dark:bg-transparent dark:border-none flex flex-row items-center justify-between'>
-											<TabsTrigger
-												value={page.title}
-												onClick={() => setCurrentPage(page.title)}
-												className="border-l-4 border-slate-400 dark:border-slate-700 "
-												>
-												<div className='flex flex-row items-center justify-between'>
-													<File
-														className={`w-4 h-4 mr-2 dark:text-[#${Math.floor(
-															Math.random() * 16777215
-														).toString(16)}]`}
-													/>
+				<ResizablePanelGroup
+					direction='horizontal'
+					className='shadow-2xl shadow-slate-600/20'>
+					<ResizablePanel className='w-1/2 h-full p-2 bg-gradient-to-r from-gray-900/10 to-black/80 border-l-2 border-t border-l-slate-900/40 border-b-slate-900/10 border-b-2 border-t-slate-900/80 rounded-l-xl'>
+						<Tabs
+							defaultValue={currentPage ?? pages[0]?.title}
+							className='h-full w-full overflow-y-auto'>
+							<div className='m-2 flex  flex-row items-center justify-between overflow-x-auto dark:bg-transparent p-1'>
+								{pages.length > 0 ? (
+									<TabsList className='bg-transparent'>
+										{pages.map((page, index) => (
+											<div
+												key={index}
+												className='dark:bg-transparent dark:border-none flex flex-row items-center justify-between'>
+												<TabsTrigger
+													value={page.title}
+													onClick={() => setCurrentPage(page.title)}
+													className='border-l-4 border-slate-900 '>
+													<motion.div
+														key={index}
+														initial={{ opacity: 0 }}
+														animate={{ opacity: 1 }}
+														transition={{ duration: 0.2 }}
+														className='flex flex-row items-center justify-between'>
+														<File
+															className={`w-4 h-4 mr-2 dark:text-[#${Math.floor(
+																Math.random() * 16777215
+															).toString(16)}]`}
+														/>
 
-													<span>{page.title}</span>
-												</div>
-											</TabsTrigger>
-											<Popover>
-												<PopoverTrigger
-													className=' ml-2 dark:bg-slate-900'
-													asChild>
-													<Button variant={`ghost`} size={`sm`}>
-														<Pencil className='w-4 h-4' />
-													</Button>
-												</PopoverTrigger>
-												<PopoverContent>
-													<UpdatePageNameForm
-														index={index}
-														title={page.title}
-														onSubmit={
-															// update page name for index.
-															(name) =>
-																setPages((pages) => {
-																	const newPages = [...pages];
-																	newPages[index] = {
-																		...newPages[index],
-																		title: name,
-																	};
-																	return newPages;
-																})
-														}
-													/>
-												</PopoverContent>
-											</Popover>
-											<Button
-												variant={"ghost"}
-												onClick={() => deletePage(index)}
-												className='flex flex-row items-center space-x-2'>
-												<X className='w-4 h-4 text-red-400 hover:text-red-500' />
-											</Button>
-										</div>
-									))}
-								</TabsList>
-							) : null}
-							<div>
+														<span>{page.title}</span>
+													</motion.div>
+												</TabsTrigger>
+												<Popover>
+													<PopoverTrigger className=' ml-2' asChild>
+														<Button variant={`link`} size={`sm`}>
+															<Pencil className='w-4 h-4' />
+														</Button>
+													</PopoverTrigger>
+													<PopoverContent>
+														<UpdatePageNameForm
+															index={index}
+															title={page.title}
+															onSubmit={
+																// update page name for index.
+																(name) =>
+																	setPages((pages) => {
+																		const newPages = [...pages];
+																		newPages[index] = {
+																			...newPages[index],
+																			title: name,
+																		};
+																		return newPages;
+																	})
+															}
+														/>
+													</PopoverContent>
+												</Popover>
+												<Button
+													variant={"link"}
+													size='sm'
+													onClick={() => deletePage(index)}
+													className='flex flex-row items-center space-x-2 mx-2'>
+													<Trash2 className='w-4 h-4 text-red-400 hover:text-red-500' />
+												</Button>
+											</div>
+										))}
+									</TabsList>
+								) : null}
+								<div>
+									<Button
+										// onClick add a new page after the last index
+										onClick={() => addPage()}
+										variant={`link`}>
+										<FilePlus2 />
+									</Button>
+								</div>
+							</div>
+							{pages.map((page, index) => (
+								<TabsContent
+									key={index}
+									value={page.title}
+									className='w-full h-full overflow-y-auto border-t  border-slate-100/90 dark:border-slate-900'>
+									<Textarea
+										id={page.title}
+										onChange={(e) =>
+											setPages(
+												pages.map((p, i) =>
+													i === index ? { ...p, content: e.target.value } : p
+												)
+											)
+										}
+										disabled={processing}
+										value={page.content.replace(/^[ \t]+/gm, "")}
+										className='bg-transparent w-full overflow-y-auto border-none ring-0 h-full focus:border-none rounded-none'
+									/>
+								</TabsContent>
+							))}
+						</Tabs>
+					</ResizablePanel>
+
+					<ResizableHandle
+						withHandle
+						className='border-none bg-gradient-to-b from-black via-slate-700/20 to-black '
+					/>
+
+					<ResizablePanel className='bg-black/50 rounded-r-xl w-1/2 h-full overflow-y-auto border-t-2 border-r border-b-2 border-slate-400/10'>
+						<div className=' flex border-b border-b-slate-100/80 dark:border-slate-900/80 mx-4 bg-transparent flex-row items-center justify-between p-1'>
+							<div className='p-3 flex flex-row items-center space-x-2'>
+								<Button variant={`link`} asChild>
+									<Link href='https://www.x.com/tegodotdev'>
+										<Github className='w-6 h-6' />
+										<span className='ml-2'>Open Source</span>
+									</Link>
+								</Button>
+								<Button variant={`link`} asChild>
+									<Link href='https://www.x.com/tegodotdev'>
+										<svg
+											xmlns='http://www.w3.org/2000/svg'
+											width='24'
+											height='24'
+											fill='currentColor'
+											className='bi bi-twitter-x'
+											viewBox='0 0 16 16'>
+											<path d='M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z' />
+										</svg>
+										<span className='ml-2'>Follow Me</span>
+									</Link>
+								</Button>
+							</div>
+							<div className='space-x-4 flex flex-row items-center'>
 								<Button
-									// onClick add a new page after the last index
-									onClick={() => addPage()}
-									variant={`link`}>
-									<FilePlus2 />
+									disabled
+									variant={`outline`}
+									onClick={() => toast({ title: "Coming soon..." })}>
+									<Link2 />
+									<span className='ml-2'>Link to PDF</span>
+								</Button>
+								<Button
+									disabled={processing}
+									variant={`outline`}
+									onClick={() => savePage()}>
+									{processing ? (
+										<Loader className='w-4 h-4 animate-spin' />
+									) : (
+										<Save />
+									)}
+									<span className='ml-2'>
+										{processing ? "Please wait..." : "Save as PDF"}
+									</span>
 								</Button>
 							</div>
 						</div>
-						{pages.map((page, index) => (
-							<TabsContent
-								key={index}
-								value={page.title}
-								className='w-full h-full overflow-y-auto border-t  border-slate-100/90 dark:border-slate-900'>
-								<Textarea
-									id={page.title}
-									onChange={(e) =>
-										setPages(
-											pages.map((p, i) =>
-												i === index ? { ...p, content: e.target.value } : p
-											)
-										)
-									}
-									disabled={processing}
-									value={page.content.replace(/^[ \t]+/gm, "")}
-									className='bg-black w-full overflow-y-auto border-none ring-0 h-full focus:border-none rounded-none'
-								/>
-							</TabsContent>
-						))}
-					</Tabs>
-				</div>
-				<div className='bg-black/80 rounded-r-xl w-1/2 h-full overflow-y-auto'>
-					<div className=' flex border-b border-b-slate-100/80 dark:border-slate-900/80 mx-4 bg-transparent flex-row items-center justify-between p-1'>
-						<div className='p-3 flex flex-row items-center space-x-4'>
-							<h1 className='text-lg font-bold dark:text-white/20 '>by</h1>
-							<Image
-								src='https://github.com/tego101.png'
-								alt='tego101'
-								width={40}
-								height={40}
-								className='rounded-full w-10 h-10'
-							/>
-							<Button variant={`link`} asChild>
-								<Link href='https://www.x.com/tegodotdev'>
-									<svg
-										xmlns='http://www.w3.org/2000/svg'
-										width='24'
-										height='24'
-										fill='currentColor'
-										className='bi bi-twitter-x'
-										viewBox='0 0 16 16'>
-										<path d='M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z' />
-									</svg>
-									<span className='ml-2'>Follow Me on X</span>
-								</Link>
-							</Button>
-						</div>
-						<div className='space-x-4 flex flex-row items-center'>
-							<Button
-								disabled
-								variant={`outline`}
-								onClick={() => toast({ title: "Coming soon..." })}>
-								<Link2 />
-								<span className='ml-2'>Link to PDF</span>
-							</Button>
-							<Button
-								disabled={processing}
-								variant={`outline`}
-								onClick={() => savePage()}>
-								{processing ? (
-									<Loader className='w-4 h-4 animate-spin' />
-								) : (
-									<Save />
-								)}
-								<span className='ml-2'>
-									{processing ? "Please wait..." : "Save as PDF"}
-								</span>
-							</Button>
-						</div>
-					</div>
-					<div className='h-full w-full overflow-y-auto px-4 break-words'>
-						<Markdown remarkPlugins={[[remarkGfm, { singleTilde: false }]]}>
-							{(
-								pages.find((p) => p.title === currentPage)?.content ?? ""
-							).replace(/^[ \t]+/gm, "")}
-						</Markdown>
-					</div>
-				</div>
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.2 }}
+							className='h-full w-full overflow-y-auto px-4 break-words'>
+							<Markdown remarkPlugins={[[remarkGfm, { singleTilde: false }]]}>
+								{(
+									pages.find((p) => p.title === currentPage)?.content ?? ""
+								).replace(/^[ \t]+/gm, "")}
+							</Markdown>
+						</motion.div>
+					</ResizablePanel>
+				</ResizablePanelGroup>
 			</div>
 			<style jsx global>
 				{`
