@@ -29,6 +29,7 @@ import {
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import UpdatePageNameForm from "./forms/update-page-name-form";
+import Image from "next/image";
 
 export interface Pages {
 	title: string;
@@ -140,6 +141,7 @@ export default function Board() {
 			window.open(url);
 		} catch (error) {
 			console.error(error);
+			setProcessing(false);
 		}
 	};
 
@@ -257,9 +259,11 @@ export default function Board() {
 					<div className=' flex border-b border-b-slate-100/80 dark:border-slate-900/80 mx-4 bg-transparent flex-row items-center justify-between p-1'>
 						<div className='p-3 flex flex-row items-center space-x-4'>
 							<h1 className='text-lg font-bold dark:text-white/20 '>by</h1>
-							<img
+							<Image
 								src='https://github.com/tego101.png'
 								alt='tego101'
+								width={40}
+								height={40}
 								className='rounded-full w-10 h-10'
 							/>
 							<Button variant={`link`} asChild>
