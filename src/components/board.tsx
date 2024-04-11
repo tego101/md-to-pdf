@@ -6,11 +6,6 @@ import remarkGfm from "remark-gfm";
 import { CreatePDF } from "@/actions/md-actions";
 import { Button } from "@/components/ui/button";
 
-import {
-	ResizableHandle,
-	ResizablePanel,
-	ResizablePanelGroup,
-} from "@/components/ui/resizable";
 
 import {
 	Popover,
@@ -18,30 +13,17 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 
 import {
-	EllipsisVertical,
 	File,
 	FilePlus2,
 	Link2,
 	Loader,
-	Pencil,
-	Plus,
-	Save,
-	Trash,
-	X,
+	Pencil, Save, X
 } from "lucide-react";
 
 import Link from "next/link";

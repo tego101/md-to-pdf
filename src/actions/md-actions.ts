@@ -1,9 +1,9 @@
 "use server";
 
 import fs from "fs";
+import { marked } from "marked";
 import path from "path";
-import puppeteer from 'puppeteer';
-import { marked } from 'marked';
+import puppeteer from "puppeteer";
 
 /**
  * CreatePDF
@@ -11,32 +11,32 @@ import { marked } from 'marked';
  * @param rawMarkdown
  */
 export const CreatePDF = async (markdownContent: string | Promise<string>) => {
-  // Ensure markdownContent is a string
-  const markdownString = await (typeof markdownContent === 'string' ? markdownContent : markdownContent);
+	// Ensure markdownContent is a string
+	const markdownString = await (typeof markdownContent === "string"
+		? markdownContent
+		: markdownContent);
 
-  // Parse Markdown to HTML
-  const html = marked(markdownString);
-  const tailwindCssPath = path.join(process.cwd(), './src/app/globals.css');
-  const tailwindCss = fs.readFileSync(tailwindCssPath, 'utf-8');
-  
-  // Launch a new browser instance
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-  
-  // Set HTML content
-  await page.setContent(html as string, { waitUntil: 'networkidle0' });
-  await page.addStyleTag({ content: tailwindCss });
+	// Parse Markdown to HTML
+	const html = marked(markdownString);
+	const tailwindCssPath = path.join(process.cwd(), ".next/static/css/globals.css");
+	const tailwindCss = fs.readFileSync(tailwindCssPath, "utf-8");
 
- 
+	// Launch a new browser instance
+	const browser = await puppeteer.launch();
+	const page = await browser.newPage();
 
-  // Generate PDF
-  const pdfBuffer = await page.pdf({ format: 'A4' });
+	// Set HTML content
+	await page.setContent(html as string, { waitUntil: "networkidle0" });
+	await page.addStyleTag({ content: tailwindCss });
 
-  // Close the browser instance
-  await browser.close();
+	// Generate PDF
+	const pdfBuffer = await page.pdf({ format: "A4" });
 
-  // Convert pdfBuffer to Base64 string
-  const base64Pdf = pdfBuffer.toString('base64');
+	// Close the browser instance
+	await browser.close();
 
-  return base64Pdf;
+	// Convert pdfBuffer to Base64 string
+	const base64Pdf = pdfBuffer.toString("base64");
+
+	return base64Pdf;
 };
