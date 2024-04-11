@@ -4,6 +4,7 @@ import path from "path";
 import puppeteer from "puppeteer";
 import { marked } from "marked";
 import { put } from "@vercel/blob";
+import chromium from "@sparticuz/chromium";
 
 const tailwindCssContent = `
   // ... (your CSS content here)
@@ -24,15 +25,13 @@ export const CreatePDF = async (markdownContent: string | Promise<string>) => {
   const html = marked(markdownString);
 
   // Launch a new browser instance
-  const browser = await puppeteer.launch();
-
-  if (process.env.NODE_ENV !== "development") {
-    puppeteer.launch = puppeteer.launch.bind(puppeteer, {
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath:
-        process.env.VERCEL_CHROME_PATH || '/usr/bin/google-chrome-stable',
-    });
-  }
+  const browser = await puppeteer.launch({
+	args: chromium.args,
+	defaultViewport: chromium.defaultViewport,
+	executablePath: await chromium.executablePath(),
+	headless: chromium.headless,
+	ignoreHTTPSErrors: true,
+  });
 
   const page = await browser.newPage();
 

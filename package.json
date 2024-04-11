@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tabs": "^1.0.4",
     "@radix-ui/react-toast": "^1.1.5",
+    "@sparticuz/chromium": "^123.0.1",
     "@types/markdown-pdf": "^9.0.5",
     "@vercel/blob": "^0.22.3",
     "chromiumly": "^3.0.1",
