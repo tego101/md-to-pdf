@@ -26,16 +26,10 @@ export default function UpdatePageNameForm({
 			<Input type="text" placeholder="New Page Name" 
         
                 defaultValue={title}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => onSubmit(e.target.value)}
             />
             <div className="w-full flex flex-row items-center justify-end">
-            <Button
-                type="submit"
-                variant="outline"
-                className="mt-2"
-            >
-                Update
-            </Button>
+          
             </div>
 		</form>
 	);

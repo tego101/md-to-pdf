@@ -219,6 +219,10 @@ export default function Board() {
 																			...newPages[index],
 																			title: name,
 																		};
+																		// set focus back to  this page.
+																		setCurrentPage(
+																			newPages[index].title
+																		)
 																		return newPages;
 																	})
 															}
@@ -277,9 +281,9 @@ export default function Board() {
 						<div className=' flex border-b border-b-slate-100/80 dark:border-slate-900/80 mx-4 bg-transparent flex-row items-center justify-between p-1'>
 							<div className='p-3 flex flex-row items-center space-x-2'>
 								<Button variant={`link`} asChild>
-									<Link href='https://www.x.com/tegodotdev'>
+									<Link href='https://github.com/tego101/md-to-pdf'>
 										<Github className='w-6 h-6' />
-										<span className='ml-2'>Open Source</span>
+										<span className='ml-2'>Source</span>
 									</Link>
 								</Button>
 								<Button variant={`link`} asChild>

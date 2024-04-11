@@ -149,7 +149,14 @@ export const CreatePDF = async (markdownContent: string | Promise<string>) => {
 	const html = marked(markdownString);
 
 	// Launch a new browser instance
-	const browser = await puppeteer.launch();
+	const browser = await puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    // vercel compatibility
+    ignoreHTTPSErrors: true,
+    headless: true,
+    devtools: true,
+    executablePath: await chromium.executablePath(),
+  });
 
 	const page = await browser.newPage();
 
