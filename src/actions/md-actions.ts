@@ -149,14 +149,7 @@ export const CreatePDF = async (markdownContent: string | Promise<string>) => {
 	const html = marked(markdownString);
 
 	// Launch a new browser instance
-	const browser = await puppeteer.launch({
-		// config for serverless vercel.
-		args: chromium.args,
-		defaultViewport: chromium.defaultViewport,
-		executablePath: await chromium.executablePath(),
-		headless: chromium.headless,
-		ignoreHTTPSErrors: true,
-	});
+	const browser = await puppeteer.launch();
 
 	const page = await browser.newPage();
 
