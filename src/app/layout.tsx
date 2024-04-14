@@ -23,13 +23,13 @@ export default function RootLayout({
 		<html lang='en'>
 			<body
 				className={cn(
-					"transition-all dark duration-500 ease-in-out min-h-screen bg-white dark:bg-gradient-to-tr dark:from-black dark:to-slate-900 dark:text-white font-sans antialiased",
+					"transition-all  duration-500 ease-in-out min-h-screen bg-white dark:bg-gradient-to-tr dark:from-black dark:to-slate-900 dark:text-white font-sans antialiased",
 					GeistSans.variable
 				)}>
 				<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-					<AuthProvider>
+					 
 						<main>{children}</main>
-					</AuthProvider>
+					 
 					<Toaster />
 				</ThemeProvider>
 			</body>

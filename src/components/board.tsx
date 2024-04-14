@@ -1,11 +1,12 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { m, motion } from "framer-motion";
 
 import Markdown from "react-markdown";
+import generatePDF, { usePDF } from "react-to-pdf";
 import remarkGfm from "remark-gfm";
+import { marked } from "marked";
 
-import { CreatePDF } from "@/actions/md-actions";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -21,10 +22,12 @@ import { useToast } from "@/components/ui/use-toast";
 import {
 	File,
 	FilePlus2,
-	Github, Link2,
+	Github,
+	Link2,
 	Loader,
 	Pencil,
-	Save, Trash2
+	Save,
+	Trash2,
 } from "lucide-react";
 
 import Link from "next/link";
@@ -35,6 +38,8 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "./ui/resizable";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 export interface Pages {
 	title: string;
@@ -43,14 +48,12 @@ export interface Pages {
 
 export default function Board() {
 	const { toast } = useToast();
+	const { toPDF, targetRef } = usePDF({ filename: "page.pdf" });
 
 	const [loading, setLoading] = useState<boolean>(true);
 	const [processing, setProcessing] = useState<boolean>(false);
 	const [pages, setPages] = useState<Pages[]>([]);
 	const [currentPage, setCurrentPage] = useState<string>();
-
-	// Save type will be used to determine which pages to save all or the selected page or pages.
-	const [saveType, setSaveType] = useState<string | [] | undefined>("all");
 
 	useEffect(() => {
 		// Add some initial pages on mount
@@ -68,7 +71,7 @@ export default function Board() {
                 ### nextjs
                 ### tailwindcss
                 ### shadcn-ui`,
-			}
+			},
 		];
 		setPages(initialPages);
 		setCurrentPage(initialPages[0].title);
@@ -110,43 +113,87 @@ export default function Board() {
 		}
 	};
 
+	function base64ToBlob(base64: string, contentType: any) {
+		const byteCharacters = atob(
+			base64.replace(/^data:[a-z]+\/[a-z]+;base64,/, "")
+		);
+		const byteArrays = [];
+
+		for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+			const slice = byteCharacters.slice(offset, offset + 512);
+			const byteNumbers = new Array(slice.length);
+			for (let i = 0; i < slice.length; i++) {
+				byteNumbers[i] = slice.charCodeAt(i);
+			}
+			const byteArray = new Uint8Array(byteNumbers);
+			byteArrays.push(byteArray);
+		}
+
+		return new Blob(byteArrays, { type: contentType });
+	}
+
 	const savePage = async () => {
-		try {
-			setProcessing(true);
+		setProcessing(true);
+
+
+			// Build html string from markdown.
+			const content = marked.parse(
+				pages
+					.find((p) => p.title === currentPage)
+					?.content.replace(/^[ \t]+/gm, "") ?? ""
+			);
+
+		toast({
+			title: "Processing your PDF...",
+			description: "This may take a few seconds.",
+			duration: 2000,
+		});
+
+	 
+		if (!content) {
 			toast({
-				title: "Processing your PDF...",
-				description: "This may take a few seconds.",
-				duration: 5000,
+				title: "Error",
+				description: "The page is empty.",
+				variant: "destructive",
 			});
-
-			const base64Pdf = await CreatePDF(
-				(pages.find((p) => p.title === currentPage)?.content ?? "").replace(
-					/^[ \t]+/gm,
-					""
-				)
-			);
-
-			// Convert Base64 string to Uint8Array
-			const pdfBuffer = Uint8Array.from(atob(base64Pdf), (c) =>
-				c.charCodeAt(0)
-			);
-
-			// Create a Blob from the PDF buffer
-			const blob = new Blob([pdfBuffer], { type: "application/pdf" });
-
-			// Create a temporary URL for the PDF
-			const url = URL.createObjectURL(blob);
-
 			setProcessing(false);
-			// Open the PDF in a new tab or window
-			window.open(url);
+			return;
+		}
+
+		if (content.length < 50) {
+			toast({
+				title: "Error",
+				description: "Content is too short.",
+				variant: "destructive",
+			});
+			setProcessing(false);
+			return;
+		}
+
+		try {
+			const pdfName = `${currentPage}_${Date()}_md-to-pdf_tegodotdev.pdf`;
+ 
+
+			console.log("content", content);
+
+			// Convert html to pdf.
+			
+
 			toast({
 				title: "PDF generated!",
-				description: "Your PDF should have opened in a new tab.",
+				description: "Your PDF has been successfully generated and downloaded.",
 				duration: 5000,
 			});
 		} catch (error) {
-			console.error(error);
+			console.error("Error in generating PDF", error);
+			toast({
+				title: "Something went wrong!",
+				description:
+					error.message ?? "There was an error while generating your PDF.",
+				duration: 5000,
+				variant: "destructive",
+			});
+		} finally {
 			setProcessing(false);
 		}
 	};
@@ -170,11 +217,12 @@ export default function Board() {
 				<ResizablePanelGroup
 					direction='horizontal'
 					className='shadow-2xl shadow-slate-600/20'>
-					<ResizablePanel className='w-1/2 h-full p-2 bg-gradient-to-r from-gray-900/10 to-black/80 border-l-2 border-t border-l-slate-900/40 border-b-slate-900/10 border-b-2 border-t-slate-900/80 rounded-l-xl'>
+					<ResizablePanel className='w-1/2 h-full p-2 bg-gradient-to-br from-slate-300 to-white dark:from-gray-900/10 dark:to-black/80 border-l-2 dark:border-l-slate-900/40 dark:border-b-slate-900/10 border-b-2 dark:border-t-slate-900/80'>
 						<Tabs
-							defaultValue={currentPage ?? pages[0]?.title}
+							defaultValue={currentPage}
+							value={currentPage}
 							className='h-full w-full overflow-y-auto'>
-							<div className='m-2 flex  flex-row items-center justify-between overflow-x-auto dark:bg-transparent p-1'>
+							<div className='m-2 flex flex-row items-center justify-between overflow-x-auto dark:bg-transparent p-1'>
 								{pages.length > 0 ? (
 									<TabsList className='bg-transparent'>
 										{pages.map((page, index) => (
@@ -184,7 +232,7 @@ export default function Board() {
 												<TabsTrigger
 													value={page.title}
 													onClick={() => setCurrentPage(page.title)}
-													className='border-l-4 border-slate-900 '>
+													className='border-l-4 border-slate-400 dark:border-slate-900 '>
 													<motion.div
 														key={index}
 														initial={{ opacity: 0 }}
@@ -219,10 +267,11 @@ export default function Board() {
 																			...newPages[index],
 																			title: name,
 																		};
-																		// set focus back to  this page.
+
 																		setCurrentPage(
-																			newPages[index].title
-																		)
+																			newPages[index].title ?? page.title
+																		);
+
 																		return newPages;
 																	})
 															}
@@ -234,7 +283,7 @@ export default function Board() {
 													size='sm'
 													onClick={() => deletePage(index)}
 													className='flex flex-row items-center space-x-2 mx-2'>
-													<Trash2 className='w-4 h-4 text-red-400 hover:text-red-500' />
+													<Trash2 className='w-4 h-4 text-slate-500 hover:text-slate-600 dark:text-red-400 dark:hover:text-red-500' />
 												</Button>
 											</div>
 										))}
@@ -274,10 +323,10 @@ export default function Board() {
 
 					<ResizableHandle
 						withHandle
-						className='border-none bg-gradient-to-b from-black via-slate-700/20 to-black '
+						className='border-none bg-gradient-to-b via-slate-200 to-slate-100 from-slate-100 dark:from-black dark:via-slate-700/20 dark:to-black '
 					/>
 
-					<ResizablePanel className='bg-black/50 rounded-r-xl w-1/2 h-full overflow-y-auto border-t-2 border-r border-b-2 border-slate-400/10'>
+					<ResizablePanel className='bg-white dark:bg-black/50 w-1/2 h-full overflow-y-auto border-t-2 border-r border-b-2 border-slate-400/10'>
 						<div className=' flex border-b border-b-slate-100/80 dark:border-slate-900/80 mx-4 bg-transparent flex-row items-center justify-between p-1'>
 							<div className='p-3 flex flex-row items-center space-x-2'>
 								<Button variant={`link`} asChild>
@@ -325,11 +374,15 @@ export default function Board() {
 							</div>
 						</div>
 						<motion.div
+							ref={targetRef}
+							id='wrapper'
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.2 }}
-							className='h-full w-full overflow-y-auto px-4 break-words'>
-							<Markdown remarkPlugins={[[remarkGfm, { singleTilde: false }]]}>
+							className='h-screen w-full overflow-y-auto px-4 break-words'>
+							<Markdown
+								remarkPlugins={[[remarkGfm, { singleTilde: true }]]}
+								className={`mb-40 h-auto`}>
 								{(
 									pages.find((p) => p.title === currentPage)?.content ?? ""
 								).replace(/^[ \t]+/gm, "")}
@@ -347,158 +400,3 @@ export default function Board() {
 		</Suspense>
 	);
 }
-
-/*	return (
-		<Suspense
-			fallback={
-				<div className='flex flex-col items-center justify-center h-screen w-full'>
-					<Loader className='w-12 h-12 dark:text-white animate-spin' />
-				</div>
-			}>
-			<main className='flex min-h-screen flex-col h-screen justify-between overflow-y-auto'>
-				<ResizablePanelGroup direction='horizontal'>
-					<ResizablePanel className='flex flex-col h-full bg-gradient-to-br from-indigo-200/10 dark:from-gray-900/20 dark:to-black w-1/2'>
-						<Tabs
-							defaultValue={currentPage ?? pages[0]?.title}
-							className='w-full h-full overflow-y-auto'>
-							<div className='m-2 flex dark:bg-black flex-row items-center justify-between overflow-x-auto dark:bg-transparent p-1'>
-								{pages.length > 0 ? (
-									<TabsList>
-										{pages.map((page, index) => (
-											<div
-												key={index}
-												className='dark:bg-transparent dark:border-none flex flex-row items-center justify-between'>
-												<TabsTrigger
-													value={page.title}
-													onClick={() => setCurrentPage(page.title)}>
-													<div className='flex flex-row items-center justify-between'>
-														<File
-															className={`w-4 h-4 mr-2 dark:text-[#${Math.floor(
-																Math.random() * 16777215
-															).toString(16)}]`}
-														/>
-
-														<span>{page.title}</span>
-													</div>
-												</TabsTrigger>
-												<Popover>
-													<PopoverTrigger
-														className=' ml-2 dark:bg-slate-900'
-														asChild>
-														<Button variant={`ghost`} size={`sm`}>
-															<Pencil className='w-4 h-4' />
-														</Button>
-													</PopoverTrigger>
-													<PopoverContent>
-														<UpdatePageNameForm
-															index={index}
-															title={page.title}
-															onSubmit={
-																// update page name for index.
-																(name) =>
-																	setPages((pages) => {
-																		const newPages = [...pages];
-																		newPages[index] = {
-																			...newPages[index],
-																			title: name,
-																		};
-																		return newPages;
-																	})
-															}
-														/>
-													</PopoverContent>
-												</Popover>
-												<Button
-													variant={"ghost"}
-													onClick={() => deletePage(index)}
-													className='flex flex-row items-center space-x-2'>
-													<X className='w-4 h-4 text-red-400 hover:text-red-500' />
-												</Button>
-											</div>
-										))}
-									</TabsList>
-								) : null}
-								<div>
-									<Button
-										// onClick add a new page after the last index
-										onClick={() => addPage()}
-										variant={`link`}>
-										<FilePlus2 />
-									</Button>
-								</div>
-							</div>
-							{pages.map((page, index) => (
-								<TabsContent
-									key={index}
-									value={page.title}
-									className='border-t border-slate-100/90 dark:border-slate-900'>
-									<Textarea
-										id={page.title}
-										onChange={(e) =>
-											setPages(
-												pages.map((p, i) =>
-													i === index ? { ...p, content: e.target.value } : p
-												)
-											)
-										}
-										value={page.content.replace(/^[ \t]+/gm, "")}
-										className='bg-orange-100/20 dark:bg-black/10   h-screen border-0 focus:border-none rounded-none'
-									/>
-								</TabsContent>
-							))}
-						</Tabs>
-					</ResizablePanel>
-					<ResizableHandle className='border-none' />
-					<ResizablePanel className='border-none overflow-y-auto bg-amber-200/5 dark:bg-black pb-50'>
-						<div className=' flex border-b border-b-slate-100/80 dark:border-slate-900/80 mx-4 bg-transparent flex-row items-center justify-between p-1'>
-							<div className='p-2 flex flex-row items-center space-x-4'>
-								<img
-									src='https://github.com/tego101.png'
-									alt='tego101'
-									className='rounded-full w-10 h-10'
-								/>
-								<Button variant={`link`} asChild>
-									<Link href='https://www.x.com/tegodotdev'>
-										<svg
-											xmlns='http://www.w3.org/2000/svg'
-											width='24'
-											height='24'
-											fill='currentColor'
-											className='bi bi-twitter-x'
-											viewBox='0 0 16 16'>
-											<path d='M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z' />
-										</svg>
-										<span className='ml-2'>Follow Me on X</span>
-									</Link>
-								</Button>
-							</div>
-							<div className='space-x-4 flex flex-row items-center'>
-								<Button
-									disabled
-									variant={`outline`}
-									onClick={() => toast({ title: "Coming soon..." })}>
-									<Link2 />
-									<span className='ml-2'>Link to PDF</span>
-								</Button>
-								<Button variant={`outline`} onClick={() => savePage()}>
-									<Save />
-									<span className='ml-2'>Save as PDF</span>
-								</Button>
-							</div>
-						</div>
-						<div className='h-screen pb-80 bg-gradient-to-tl pb-50 from-slate-100 dark:from-black/90 dark:text-white w-screen overflow-y-auto px-4 break-words'>
-							<Markdown
-								remarkPlugins={[[remarkGfm, { singleTilde: false }]]}
-								className='h-screen pb-40 bg-gradient-to-b from-white/40 dark:from-transparent'>
-								{(
-									pages.find((p) => p.title === currentPage)?.content ?? ""
-								).replace(/^[ \t]+/gm, "")}
-							</Markdown>
-						</div>
-					</ResizablePanel>
-				</ResizablePanelGroup>
-			</main>
-		</Suspense>
-	);
-}
-*/

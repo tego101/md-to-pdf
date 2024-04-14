@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
+import { on } from "events";
 
 export default function UpdatePageNameForm({
     index,
@@ -24,9 +25,12 @@ export default function UpdatePageNameForm({
             onSubmit={(e) => handleSubmit(e)}
         >
 			<Input type="text" placeholder="New Page Name" 
-        
+
                 defaultValue={title}
                 onChange={(e) => onSubmit(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && onSubmit(e.target.value)}
+                onBlur={(e) => onSubmit(e.target.value)}
+                className="h-10"
             />
             <div className="w-full flex flex-row items-center justify-end">
           
