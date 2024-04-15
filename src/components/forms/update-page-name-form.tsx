@@ -28,7 +28,6 @@ export default function UpdatePageNameForm({
 
                 defaultValue={title}
                 onChange={(e) => onSubmit(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && onSubmit(e.target.value)}
                 onBlur={(e) => onSubmit(e.target.value)}
                 className="h-10"
             />

@@ -135,13 +135,12 @@ export default function Board() {
 	const savePage = async () => {
 		setProcessing(true);
 
-
-			// Build html string from markdown.
-			const content = marked.parse(
-				pages
-					.find((p) => p.title === currentPage)
-					?.content.replace(/^[ \t]+/gm, "") ?? ""
-			);
+		// Build html string from markdown.
+		const content = marked.parse(
+			pages
+				.find((p) => p.title === currentPage)
+				?.content.replace(/^[ \t]+/gm, "") ?? ""
+		);
 
 		toast({
 			title: "Processing your PDF...",
@@ -149,7 +148,6 @@ export default function Board() {
 			duration: 2000,
 		});
 
-	 
 		if (!content) {
 			toast({
 				title: "Error",
@@ -160,6 +158,7 @@ export default function Board() {
 			return;
 		}
 
+		// @ts-ignore
 		if (content.length < 50) {
 			toast({
 				title: "Error",
@@ -172,12 +171,10 @@ export default function Board() {
 
 		try {
 			const pdfName = `${currentPage}_${Date()}_md-to-pdf_tegodotdev.pdf`;
- 
 
 			console.log("content", content);
 
 			// Convert html to pdf.
-			
 
 			toast({
 				title: "PDF generated!",
@@ -189,6 +186,7 @@ export default function Board() {
 			toast({
 				title: "Something went wrong!",
 				description:
+					// @ts-ignore
 					error.message ?? "There was an error while generating your PDF.",
 				duration: 5000,
 				variant: "destructive",
