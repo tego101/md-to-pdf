@@ -23,7 +23,7 @@ export default function RootLayout({
 		<html lang='en'>
 			<body
 				className={cn(
-					"transition-all  duration-500 ease-in-out min-h-screen bg-white dark:bg-gradient-to-tr dark:from-black dark:to-slate-900 dark:text-white font-sans antialiased",
+					"transition-all dark  duration-500 ease-in-out min-h-screen font-sans bg-black antialiased",
 					GeistSans.variable
 				)}>
 				<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
