@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 
+import { Toaster } from "@/components/ui/toaster";
 import { GeistSans } from "geist/font/sans";
-import { Toaster } from "@/components/ui/toaster"
 
+import { ThemeProvider } from "@/lib/providers";
 import "./globals.css";
-import AuthProvider, { ThemeProvider } from "@/lib/providers";
 
 import { cn } from "@/lib/utils";
 
@@ -23,7 +23,7 @@ export default function RootLayout({
 		<html lang='en'>
 			<body
 				className={cn(
-					"transition-all dark  duration-500 ease-in-out min-h-screen font-sans bg-black antialiased",
+					"transition-all dark  duration-500 ease-in-out min-h-screen font-sans bg-black antialiased ov",
 					GeistSans.variable
 				)}>
 				<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
