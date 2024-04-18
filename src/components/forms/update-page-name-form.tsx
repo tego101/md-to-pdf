@@ -1,35 +1,34 @@
 "use client";
-import React, { useState } from "react";
+
+/**
+ * Update Page Name Form Component.
+ * This component allows the user to update the name of a page.
+ * @param title - The current title of the page.
+ * @param onSubmit - The callback function to be called when the form is submitted.
+ * @returns JSX.Element - The component to be rendered.
+ */
 import { Input } from "@/components/ui/input";
-import { Button } from "../ui/button";
-import { on } from "events";
 
 export default function UpdatePageNameForm({
-	index,
 	title,
 	onSubmit,
 }: {
-	index: number;
 	title: string;
 	onSubmit: (name: string) => void;
 }) {
-	const [name, setName] = useState<string>("");
 
-	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		onSubmit(name);
-	};
-
+ 
 	return (
-		<form onSubmit={(e) => handleSubmit(e)}>
+		<div >
 			<Input
 				type='text'
+				required
 				placeholder='New Page Name'
 				defaultValue={title}
 				onChange={(e) => onSubmit(e.target.value)}
 				onBlur={(e) => onSubmit(e.target.value)}
 				className='h-10'
 			/>
-		</form>
+		</div>
 	);
 }

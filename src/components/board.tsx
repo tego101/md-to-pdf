@@ -1,5 +1,11 @@
 "use client";
 
+/**
+ * Board Component.
+ * This component contains the board layout, input textarea and viewer.
+ * @returns JSX.Element - The component to be rendered.
+ */
+
 // React.
 import { Suspense, useEffect, useRef, useState } from "react";
 
@@ -16,16 +22,17 @@ import remarkGfm from "remark-gfm";
 import Link from "next/link";
 
 // UI Components.
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 import {
 	Popover,
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
+
 import {
 	ResizableHandle,
 	ResizablePanel,
@@ -51,6 +58,14 @@ import UpdatePageNameForm from "@/components/forms/update-page-name-form";
 export interface Page {
 	title: string;
 	content: string;
+}
+
+export function Loading() {
+	return (
+		<div className='flex flex-col items-center justify-center h-screen w-full'>
+			<Loader className='w-12 h-12 dark:text-white animate-spin' />
+		</div>
+	);
 }
 
 /**
@@ -209,20 +224,11 @@ export default function Board() {
 	};
 
 	if (loading) {
-		return (
-			<div className='flex flex-col items-center justify-center h-screen w-full'>
-				<Loader className='w-12 h-12 dark:text-white animate-spin' />
-			</div>
-		);
+		return <Loading />;
 	}
 
 	return (
-		<Suspense
-			fallback={
-				<div className='flex flex-col items-center justify-center h-screen w-full'>
-					<Loader className='w-12 h-12 dark:text-white animate-spin' />
-				</div>
-			}>
+		<Suspense fallback={<Loading />}>
 			<div className='flex flex-col h-screen w-screen'>
 				<div className='flex flex-row items-center h-auto w-auto'>
 					<div className='bg-black relative top-0 w-full '>
@@ -323,7 +329,6 @@ export default function Board() {
 														</PopoverTrigger>
 														<PopoverContent className='padding-0 margin-0'>
 															<UpdatePageNameForm
-																index={index}
 																title={page.title}
 																onSubmit={
 																	// update page name for index.
@@ -388,7 +393,7 @@ export default function Board() {
 											}
 											disabled={processing}
 											value={page.content.replace(/^[ \t]+/gm, "")}
-											className='bg-gradient-to-b rounded-2xl text-slate-100 from-black to-slate-900/20 w-full overflow-y-auto border border-slate-700 ring-0 outline-none focus:border-none min-h-[400px] focus:outline-none focus:ring-0'
+											className='h-screen bg-gradient-to-b rounded-2xl text-slate-100 from-black to-slate-900/20 w-full overflow-y-auto border border-slate-700 ring-0 outline-none focus:border-none min-h-[400px] focus:outline-none focus:ring-0'
 										/>
 									</TabsContent>
 								))}
