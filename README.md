@@ -1,10 +1,11 @@
 # MD-TO-PDF
 
 Web application used to generate PDF documents from user input Markdown.
+![picture of md-to-pdf](https://md-to-pdf.vercel.app/ss.png)
 
 ## **Stack**
 
-* NextJS
+- NextJS
 
 ## Features
 
