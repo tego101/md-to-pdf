@@ -250,7 +250,7 @@ export default function Board() {
               Works best on desktop.
             </h1>
             <p className="text-sm text-slate-400">
-              This tool is best used on a desktop or laptop.
+              This tool is best used on a large display.
             </p>
             <div className=" flex flex-col items-start pt-4 space-y-2">
               <Button variant={`link`} asChild>
