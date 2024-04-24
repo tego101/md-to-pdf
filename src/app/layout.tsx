@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/react";
 import type { Metadata } from "next";
 
 import { Toaster } from "@/components/ui/toaster";
@@ -27,11 +28,12 @@ export default function RootLayout({
 					GeistSans.variable
 				)}>
 				<ThemeProvider attribute='class' defaultTheme='system' enableSystem>
-					 
+
 						<main>{children}</main>
-					 
+
 					<Toaster />
 				</ThemeProvider>
+				<Analytics/>
 			</body>
 		</html>
 	);
